@@ -53,39 +53,35 @@
 
 
 ---
-- name: Install Grafana on Amazon Linux
-  hosts: monitor
-  become: yes
+- name: Remove old Grafana repository
+  file:
+    path: /etc/yum.repos.d/grafana.repo
+    state: absent
 
-  tasks:
+- name: Create Grafana repository
+  copy:
+    dest: /etc/yum.repos.d/grafana.repo
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [grafana]
+      name=grafana
+      baseurl=https://rpm.grafana.com
+      repo_gpgcheck=1
+      enabled=1
+      gpgcheck=1
+      gpgkey=https://rpm.grafana.com/gpg.key
+      sslverify=1
+      sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 
-    - name: Remove old Grafana repository
-      file:
-        path: /etc/yum.repos.d/grafana.repo
-        state: absent
+- name: Install Grafana
+  yum:
+    name: grafana
+    state: present
 
-    - name: Create Grafana repository
-      copy:
-        dest: /etc/yum.repos.d/grafana.repo
-        mode: '0644'
-        content: |
-          [grafana]
-          name=grafana
-          baseurl=https://rpm.grafana.com
-          repo_gpgcheck=1
-          enabled=1
-          gpgcheck=1
-          gpgkey=https://rpm.grafana.com/gpg.key
-          sslverify=1
-          sslcacert=/etc/pki/tls/certs/ca-bundle.crt
-
-    - name: Install Grafana
-      yum:
-        name: grafana
-        state: present
-
-    - name: Start Grafana
-      systemd:
-        name: grafana-server
-        enabled: yes
-        state: started
+- name: Enable and start Grafana
+  systemd:
+    name: grafana-server
+    enabled: yes
+    state: started
