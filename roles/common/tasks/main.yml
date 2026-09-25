@@ -11,15 +11,8 @@
 #     state: present
 
 
-- name: Update system
-  yum:
-    name: "*"
-    state: latest
-    update_cache: yes
-
 - name: Install base packages
-  yum:
+  dnf:
     name:
-      - curl
       - wget
     state: present
